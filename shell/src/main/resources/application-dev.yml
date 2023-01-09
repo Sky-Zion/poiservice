@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5430/poi
+    username: andrey
+    password: Avik$13011961
+  jpa:
+    show-sql: false
+    generate-ddl: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL94Dialect
+        ddl-auto: create-drop
+        format_sql: false
+    defer-datasource-initialization: false
+  sql:
+    init:
+      mode: never
+
+logging:
+  level.ru.dsci.*: debug
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread]: %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.sss} [%thread] %-5level %logger{36}: %msg%n"
+  file:
+    name: logs/dbservice.log
+    path: logs/
