@@ -1,4 +1,4 @@
-package ru.dsci.poiservice.telegrambot;
+package ru.dsci.poiservice.bot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

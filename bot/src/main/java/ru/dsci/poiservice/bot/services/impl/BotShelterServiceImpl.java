@@ -1,4 +1,4 @@
-package ru.dsci.poiservice.telegrambot.services.impl;
+package ru.dsci.poiservice.bot.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,9 +7,9 @@ import ru.dsci.poiservice.core.entities.Poi;
 import ru.dsci.poiservice.core.entities.PoiType;
 import ru.dsci.poiservice.core.services.PoiService;
 import ru.dsci.poiservice.core.services.PoiTypeService;
-import ru.dsci.poiservice.telegrambot.dtos.PoiDistance;
-import ru.dsci.poiservice.telegrambot.dtos.PoiDistanceList;
-import ru.dsci.poiservice.telegrambot.services.BotShelterService;
+import ru.dsci.poiservice.bot.dtos.PoiDistance;
+import ru.dsci.poiservice.bot.dtos.PoiDistanceList;
+import ru.dsci.poiservice.bot.services.BotShelterService;
 import ru.dsci.poiservice.core.geomath.Point;
 
 import javax.annotation.PostConstruct;

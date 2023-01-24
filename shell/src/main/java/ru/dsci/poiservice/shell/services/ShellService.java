@@ -9,7 +9,9 @@ import java.util.List;
 
 public interface ShellService {
 
-    void updateShelters(String url);
+    List<String> getItemsFromYandexMap(String url);
+
+    void updatePoisFromYandexMap(String poiTypeCode, String url);
 
     List<PoiType> getPoiTypes();
 
@@ -19,7 +21,7 @@ public interface ShellService {
                   BigDecimal geoLat,
                   BigDecimal geoLong);
 
-    Poi updatePoiOsm(String typeCode, String address, String description) throws IOException;
+    Poi updatePoiOsm(String poiTypeCode, String address, String description) throws IOException;
 
     PoiType updatePoiType(String code, String title, String description);
 

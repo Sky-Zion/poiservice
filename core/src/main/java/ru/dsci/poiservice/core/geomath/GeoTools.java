@@ -18,25 +18,25 @@ public class GeoTools {
         return getDistance(pointA.getLat(), pointA.getLon(), pointB.getLat(), pointB.getLon());
     }
 
-    public static double distanceToLatRad(double distance) {
-        return distance / EARTH_R;
+    public static double latOffsetRad(double dX) {
+        return dX / EARTH_R;
     }
 
-    public static double distanceToLonRad(double distance, double lat) {
-        return distance / (EARTH_R * cos(lat));
+    public static double lonOffsetToRad(double dY, double lat) {
+        return dY / (EARTH_R * cos(lat));
     }
 
-    public static double distanceToLatDeg(double distance) {
-        return Math.toDegrees(distanceToLatRad(distance));
+    public static double latOffsetToDeg(double dX) {
+        return Math.toDegrees(latOffsetRad(dX));
     }
 
-    public static double distanceToLonDeg(double distance, double lat) {
-        return Math.toDegrees(distanceToLonRad(distance, Math.toRadians(lat)));
+    public static double lonOffsetToDeg(double dY, double lat) {
+        return Math.toDegrees(lonOffsetToRad(dY, Math.toRadians(lat)));
     }
 
-    public static Point movePoint(Point point, double dX, double dY) {
-        double lat = point.getLat() + distanceToLatDeg(dX);
-        return new Point(lat, point.getLon() + distanceToLonDeg(dY, lat));
+    public static Point pointOffset(Point point, double dX, double dY) {
+        double lat = point.getLat() + latOffsetToDeg(dX);
+        return new Point(lat, point.getLon() + lonOffsetToDeg(dY, lat));
     }
 
 }

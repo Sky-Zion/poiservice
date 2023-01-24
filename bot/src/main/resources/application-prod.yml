@@ -1,11 +1,11 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5430/poi
-    username: andrey
-    password: Avik$13011961
+    url: jdbc:postgresql://localhost:5432/poi
+    username: postgres
+    password: Aviks131
   jpa:
-    show-sql: false
+    show-sql: true
     generate-ddl: true
     properties:
       hibernate:
@@ -23,5 +23,12 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread]: %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.sss} [%thread] %-5level %logger{36}: %msg%n"
   file:
-    name: logs/dbservice.log
+    name: logs/bot.log
     path: logs/
+
+telegram_bot:
+  username: Shelter Base
+  token: 5935777952:AAE6Z5Fc39kvz7lkaDZYjcwGZ7uXqCaBX5E
+
+poi:
+  seek_range_list: 300,1000,3000

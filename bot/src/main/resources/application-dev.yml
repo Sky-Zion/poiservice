@@ -23,13 +23,13 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread]: %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.sss} [%thread] %-5level %logger{36}: %msg%n"
   file:
-    name: logs/telegrambot.log
+    name: logs/bot.log
     path: logs/
 
 telegram_bot:
-  username: Shelter in place
-  token: 5972627387:AAGgFj-ReHRIZM5ZmSMzg7tqZSB4gCfxMek
+  username: ShelterBaseTest
+  token: 5925307716:AAEoP4KnSNWAZO-26u61MqBV0uujzHUFTGw
 
 
 poi:
-  seek_range_list: 150, 300, 600, 1000
+  seek_range_list: 300,1000,3000

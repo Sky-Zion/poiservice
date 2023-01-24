@@ -1,4 +1,4 @@
-package ru.dsci.poiservice.telegrambot.dtos;
+package ru.dsci.poiservice.bot.dtos;
 
 import lombok.Data;
 

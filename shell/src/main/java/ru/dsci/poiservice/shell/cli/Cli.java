@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-import ru.dsci.poiservice.shell.services.ShellService;
 import ru.dsci.poiservice.core.services.OsmGeoService;
+import ru.dsci.poiservice.shell.services.ShellService;
 
 import java.math.BigDecimal;
 
@@ -18,15 +18,31 @@ public class Cli {
     private final ShellService shellService;
     private final OsmGeoService osmGeoService;
 
-    @ShellMethod(key = "us", value = "update shelters")
-    public void updateShelters(
+    @ShellMethod(key = "lim", value = "list map items from yandex map")
+    public void updatePoiFromYandexMap(
             @ShellOption(
                     value = {"-u", "--url"},
-                    help = "shelters map url",
-                    defaultValue = ShellOption.NULL)
+                    help = "yandex map url")
                     String url) {
         try {
-            shellService.updateShelters(url);
+            shellService.getItemsFromYandexMap(url).forEach(log::info);
+        } catch (Exception e) {
+            log.error("Error: {}", e.getMessage());
+        }
+    }
+
+    @ShellMethod(key = "upm", value = "update POIs from yandex map")
+    public void updatePoiFromYandexMap(
+            @ShellOption(
+                    value = {"-t", "--type"},
+                    help = "POI type code")
+                    String poiTypeCode,
+            @ShellOption(
+                    value = {"-u", "--url"},
+                    help = "yandex map url")
+                    String url) {
+        try {
+            shellService.updatePoisFromYandexMap(poiTypeCode, url);
         } catch (Exception e) {
             log.error("Error: {}", e.getMessage());
         }
@@ -130,8 +146,8 @@ public class Cli {
         }
     }
 
-    @ShellMethod(key = "gd", value = "Get OSM GEO data")
-    public void getOsm(
+    @ShellMethod(key = "gpa", value = "get POI data by address from OSM service")
+    public void getPoiFromOsmByAddress(
             @ShellOption(
                     value = {"-a", "--address"},
                     help = "object address")

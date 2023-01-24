@@ -7,8 +7,11 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import ru.dsci.poiservice.core.entities.Poi;
 import ru.dsci.poiservice.core.entities.PoiType;
-import ru.dsci.poiservice.core.services.*;
-import ru.dsci.poiservice.shell.services.*;
+import ru.dsci.poiservice.core.services.OsmGeoService;
+import ru.dsci.poiservice.core.services.PoiService;
+import ru.dsci.poiservice.core.services.PoiTypeService;
+import ru.dsci.poiservice.shell.services.ShellService;
+import ru.dsci.poiservice.shell.services.YandexMapService;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
@@ -24,12 +27,20 @@ public class ShellServiceImpl implements ShellService {
     private final PoiTypeService poiTypeService;
     private final PoiService poiService;
     private final OsmGeoService osmGeoService;
-    private final ShelterPoiService shelterPoiService;
+    private final YandexMapService yandexMapService;
     private final ModelMapper modelMapper;
 
     @Override
-    public void updateShelters(String url) {
-        shelterPoiService.updateShelters(url);
+    public void updatePoisFromYandexMap(String poiTypeCode, String url) {
+        yandexMapService.updatePoiFromYandexMap(poiTypeCode, url);
+    }
+
+    @Override
+    public List<String> getItemsFromYandexMap(String url) {
+        log.info("retrieving yandex map items: {}", url);
+        List<String> mapItems = yandexMapService.getItemsFromYandexMap(url);
+        log.info("retrieved {} items", mapItems.size());
+        return mapItems;
     }
 
     @Override
@@ -65,8 +76,8 @@ public class ShellServiceImpl implements ShellService {
     }
 
     @Override
-    public Poi updatePoiOsm(String typeCode, String address, String description) throws IOException {
-        PoiType poiType = poiTypeService.getByCode(typeCode);
+    public Poi updatePoiOsm(String poiTypeCode, String address, String description) throws IOException {
+        PoiType poiType = poiTypeService.getByCode(poiTypeCode);
         Poi poi = new Poi();
         modelMapper.map(osmGeoService.getByAddress(address), poi);
         poi.setPoiType(poiType);

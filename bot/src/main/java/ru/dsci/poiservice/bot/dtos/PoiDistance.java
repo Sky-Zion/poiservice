@@ -1,4 +1,4 @@
-package ru.dsci.poiservice.telegrambot.dtos;
+package ru.dsci.poiservice.bot.dtos;
 
 import ru.dsci.poiservice.core.entities.Poi;
 import ru.dsci.poiservice.core.geomath.GeoTools;

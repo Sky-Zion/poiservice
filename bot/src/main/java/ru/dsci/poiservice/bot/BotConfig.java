@@ -1,4 +1,4 @@
-package ru.dsci.poiservice.telegrambot;
+package ru.dsci.poiservice.bot;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -10,8 +10,6 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import ru.dsci.poiservice.core.mappers.PoiMapper;
-
-import java.util.Properties;
 
 
 @Configuration

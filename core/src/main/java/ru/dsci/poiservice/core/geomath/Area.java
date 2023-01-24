@@ -60,10 +60,10 @@ public class Area {
         vertices.clear();
         double hw = width / 2;
         double hh = height / 2;
-        vertices.add(GeoTools.movePoint(center, -hw, -hh));
-        vertices.add(GeoTools.movePoint(center, -hw, hh));
-        vertices.add(GeoTools.movePoint(center, hw, hh));
-        vertices.add(GeoTools.movePoint(center, hw, -hh));
+        vertices.add(GeoTools.pointOffset(center, -hw, -hh));
+        vertices.add(GeoTools.pointOffset(center, -hw, hh));
+        vertices.add(GeoTools.pointOffset(center, hw, hh));
+        vertices.add(GeoTools.pointOffset(center, hw, -hh));
     }
 
     public Area(Point center, double width, double height) {
@@ -71,15 +71,6 @@ public class Area {
         this.width = width;
         this.height = height;
         setCones();
-    }
-
-    public static void main(String[] args) {
-        Area area = new Area(new Point(50.59955602617466, 36.5876993579685), 1000, 1000
-        );
-        System.out.println(area);
-        System.out.println(area.getVertices());
-        System.out.println(GeoTools.getDistance(area.getVertices().get(1), area.getVertices().get(2)));
-        System.out.println(GeoTools.getDistance(area.getVertices().get(0), area.getVertices().get(1)));
     }
 
 }
