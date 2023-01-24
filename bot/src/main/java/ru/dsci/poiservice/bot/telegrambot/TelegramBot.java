@@ -79,7 +79,8 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
             }
             poiDistanceList = botShelterService.getAllNearLocation(userLocation);
             if (poiDistanceList.size() > 0) {
-                text.append("\uD83D\uDEA8Найдены укрытия:\n");
+                text.append(String.format("\uD83D\uDEA8Найдены укрытия (%d м):\n",
+                        (int)poiDistanceList.get(poiDistanceList.size() - 1).getDistance()));
                 for (int i = 0; i < poiDistanceList.size(); i++) {
                     PoiDistance poiDistance = poiDistanceList.get(i);
                     text.append(String.format("%d: %s (%d м)\n",
