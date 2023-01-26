@@ -6,7 +6,6 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 import ru.dsci.poiservice.core.services.GeoService;
-import ru.dsci.poiservice.core.services.impl.GeoServiceImpl;
 import ru.dsci.poiservice.shell.services.ShellService;
 
 import java.math.BigDecimal;
@@ -42,9 +41,14 @@ public class Cli {
             @ShellOption(
                     value = {"-u", "--url"},
                     help = "yandex map url")
-                    String url) {
+                    String url,
+            @ShellOption(
+                    value = {"-p", "--pref"},
+                    help = "address prefix",
+                    defaultValue = ShellOption.NULL)
+                    String prefix) {
         try {
-            shellService.updatePoisFromYandexMap(poiTypeCode, url);
+            shellService.updatePoisFromYandexMap(poiTypeCode, url, prefix);
         } catch (Exception e) {
             log.error("Error: {}", e.getMessage());
         }

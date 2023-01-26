@@ -13,6 +13,8 @@ public interface ShellService {
 
     void updatePoisFromYandexMap(String poiTypeCode, String url);
 
+    void updatePoisFromYandexMap(String poiTypeCode, String url, String prefix);
+
     List<PoiType> getPoiTypes();
 
     Poi updatePoi(String typeCode,

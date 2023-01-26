@@ -6,6 +6,8 @@ public interface YandexMapService {
 
     void updatePoiFromYandexMap(String poiTypeCode, String url);
 
+    void updatePoiFromYandexMap(String poiTypeCode, String url, String prefix);
+
     List<String> getItemsFromYandexMap(String url);
 
 }

@@ -35,6 +35,11 @@ public class YandexMapServiceImpl implements YandexMapService {
 
     @Override
     public void updatePoiFromYandexMap(String poiTypeCode, String url) {
+        updatePoiFromYandexMap(poiTypeCode, url, null);
+    }
+
+    @Override
+    public void updatePoiFromYandexMap(String poiTypeCode, String url, String prefix) {
         PoiType poiType = poiTypeService.getByCodeNotFoundError(poiTypeCode);
         List<String> yandexPois = getItemsFromYandexMap(url);
         int items = yandexPois.size();
@@ -47,6 +52,8 @@ public class YandexMapServiceImpl implements YandexMapService {
                 yandexPoi = yandexPois.get(i);
                 String[] poiAddress = yandexPoi.split(":");
                 String address = poiAddress.length == 1 ? poiAddress[0] : poiAddress[poiAddress.length - 1];
+                if (prefix != null)
+                    address = String.format("%s, %s", prefix.trim(), address);
                 address = address.trim().replace("\"", "");
                 Poi poi = new Poi();
                 poi.setPoiType(poiType);

@@ -36,6 +36,11 @@ public class ShellServiceImpl implements ShellService {
     }
 
     @Override
+    public void updatePoisFromYandexMap(String poiTypeCode, String url, String prefix) {
+        yandexMapService.updatePoiFromYandexMap(poiTypeCode, url);
+    }
+
+    @Override
     public List<String> getItemsFromYandexMap(String url) {
         log.info("retrieving yandex map items: {}", url);
         List<String> mapItems = yandexMapService.getItemsFromYandexMap(url);

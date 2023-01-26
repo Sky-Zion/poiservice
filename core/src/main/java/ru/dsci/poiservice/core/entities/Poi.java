@@ -42,8 +42,8 @@ public class Poi {
                 id,
                 poiType.getTitle(),
                 address,
-                geoLon != null ? Constants.GEO_FORMAT.format(geoLon) : "",
                 geoLat != null ? Constants.GEO_FORMAT.format(geoLat) : "",
+                geoLon != null ? Constants.GEO_FORMAT.format(geoLon) : "",
                 description);
     }
 
