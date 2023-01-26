@@ -17,6 +17,9 @@ spring:
     init:
       mode: never
 
+geocoder:
+  key: rutlwl7657
+
 logging:
   level.ru.dsci.*: debug
   pattern:

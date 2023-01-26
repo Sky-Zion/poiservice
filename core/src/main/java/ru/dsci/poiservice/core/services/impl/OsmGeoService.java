@@ -4,8 +4,8 @@ import ru.dsci.poiservice.core.StringTools;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import ru.dsci.poiservice.core.clients.HttpClientImpl;
-import ru.dsci.poiservice.core.entities.dtos.DtoOsmPoi;
-import ru.dsci.poiservice.core.services.OsmGeoService;
+import ru.dsci.poiservice.core.entities.dtos.DtoPoi;
+import ru.dsci.poiservice.core.services.GeoService;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
@@ -13,38 +13,20 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.URI;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-
 
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class OsmGeoServiceImpl implements OsmGeoService {
+public class OsmGeoService implements GeoService {
 
     private final static String URL_BLANK = "https://nominatim.openstreetmap.org/search?q=%s&format=json&addressdetails=1";
 
-    private final HttpClientImpl httpClientImpl;
+    private final HttpClientImpl httpClient;
 
-    private HttpResponse<String> getResponse(String url) throws IOException {
-        HttpResponse<String> response;
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .GET()
-                    .uri(URI.create(url))
-                    .build();
-            response = httpClientImpl.getClient().send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() >= 300)
-                throw new IOException(String.format("response status: %d", response.statusCode()));
-        } catch (InterruptedException | IOException e) {
-            throw new IOException(String.format("bad response [%s]: %s", url, e.getMessage()));
-        }
-        return response;
-    }
 
-    private DtoOsmPoi getDtoOsmPoi(JSONObject responseData) throws IOException {
-        DtoOsmPoi dtoOsmPoi = null;
+    private DtoPoi getDtoOsmPoi(JSONObject responseData) throws IOException {
+        DtoPoi dtoOsmPoi = null;
         if (!responseData.has("address"))
             throw new IOException("POI address is not defined");
         JSONObject addressData = responseData.getJSONObject("address");
@@ -56,7 +38,7 @@ public class OsmGeoServiceImpl implements OsmGeoService {
                     && addressData.has("city")
                     && addressData.has("road")
                     && addressData.has("house_number")) {
-                dtoOsmPoi = new DtoOsmPoi();
+                dtoOsmPoi = new DtoPoi();
                 dtoOsmPoi.setGeoId(responseData.getLong("osm_id"));
                 dtoOsmPoi.setGeoLat(BigDecimal.valueOf(responseData.getFloat("lat")));
                 dtoOsmPoi.setGeoLon(BigDecimal.valueOf(responseData.getFloat("lon")));
@@ -73,13 +55,13 @@ public class OsmGeoServiceImpl implements OsmGeoService {
     }
 
     @Override
-    public DtoOsmPoi getByAddress(String address) throws EntityNotFoundException {
-        DtoOsmPoi dtoOsmPoi = null;
+    public DtoPoi getByAddress(String address) throws EntityNotFoundException {
+        DtoPoi dtoOsmPoi = null;
         try {
             address = address.trim();
             String url = String.format(URL_BLANK, address.replace(" ", "+"));
             url = StringTools.cleanUrl(url);
-            HttpResponse<String> response = getResponse(url);
+            HttpResponse<String> response = httpClient.getResponse(url);
             if (response.body() == null || response.body().equals("[]"))
                 throw new IOException("response body is empty");
             JSONArray responseDataArray = new JSONArray(response.body());

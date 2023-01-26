@@ -71,12 +71,12 @@ public class PoiServiceImpl implements PoiService {
     @Override
     public List<Poi> getAllByPoiTypeAndArea(PoiType poiType, Area area) {
         log.debug("{},{},{},{}", area.getVertices().get(0).getLat(), area.getVertices().get(1).getLat(), area.getVertices().get(0).getLon(), area.getVertices().get(2).getLon());
-        return poiRepository.getAllByPoiTypeAndGeoLatIsBetweenAndGeoLonIsBetween(
+        return (poiRepository.getAllByPoiTypeAndGeoLatIsBetweenAndGeoLonIsBetween(
                 poiType,
                 BigDecimal.valueOf(area.getVertices().get(0).getLat()),
                 BigDecimal.valueOf(area.getVertices().get(2).getLat()),
                 BigDecimal.valueOf(area.getVertices().get(0).getLon()),
-                BigDecimal.valueOf(area.getVertices().get(1).getLon()));
+                BigDecimal.valueOf(area.getVertices().get(1).getLon())));
     }
 
     @Override

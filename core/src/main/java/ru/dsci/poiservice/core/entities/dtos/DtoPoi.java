@@ -6,7 +6,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class DtoOsmPoi {
+public class DtoPoi {
 
     private Long geoId;
 

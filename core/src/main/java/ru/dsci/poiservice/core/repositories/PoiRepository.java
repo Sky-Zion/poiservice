@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import ru.dsci.poiservice.core.entities.Poi;
 import ru.dsci.poiservice.core.entities.PoiType;
 
+import java.awt.print.Pageable;
 import java.math.BigDecimal;
 import java.util.List;
 

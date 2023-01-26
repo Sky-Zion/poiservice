@@ -7,7 +7,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import ru.dsci.poiservice.core.entities.Poi;
 import ru.dsci.poiservice.core.entities.PoiType;
-import ru.dsci.poiservice.core.services.OsmGeoService;
+import ru.dsci.poiservice.core.services.GeoService;
 import ru.dsci.poiservice.core.services.PoiService;
 import ru.dsci.poiservice.core.services.PoiTypeService;
 import ru.dsci.poiservice.shell.services.ShellService;
@@ -26,7 +26,7 @@ import java.util.List;
 public class ShellServiceImpl implements ShellService {
     private final PoiTypeService poiTypeService;
     private final PoiService poiService;
-    private final OsmGeoService osmGeoService;
+    private final GeoService geoService;
     private final YandexMapService yandexMapService;
     private final ModelMapper modelMapper;
 
@@ -79,7 +79,7 @@ public class ShellServiceImpl implements ShellService {
     public Poi updatePoiOsm(String poiTypeCode, String address, String description) throws IOException {
         PoiType poiType = poiTypeService.getByCode(poiTypeCode);
         Poi poi = new Poi();
-        modelMapper.map(osmGeoService.getByAddress(address), poi);
+        modelMapper.map(geoService.getByAddress(address), poi);
         poi.setPoiType(poiType);
         if (description != null)
             poi.setDescription(description);

@@ -26,4 +26,10 @@ public class PoiDistanceList {
         return poiDistanceList.get(i);
     }
 
+    public List<PoiDistance> truncateSizeTo(int size) {
+        if (poiDistanceList.size() > size)
+            poiDistanceList = poiDistanceList.subList(0, size);
+        return poiDistanceList;
+    }
+
 }

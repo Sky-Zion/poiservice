@@ -2,10 +2,13 @@ package ru.dsci.poiservice.bot.commands;
 
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.io.File;
 
 @Slf4j
 public class CommandStart implements IBotCommand {
@@ -22,16 +25,16 @@ public class CommandStart implements IBotCommand {
 
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] strings) {
-        message.setText(CommandHelp.HELP_MESSAGE);
-        SendMessage sendMessage = SendMessage
+        SendAnimation sendAnimation = SendAnimation
                 .builder()
-                .chatId(message.getChatId().toString())
-                .text(message.getText())
+                .chatId(message.getChatId())
+                .caption(CommandHelp.HELP_MESSAGE)
+                .animation(new InputFile(new File(CommandHelp.HELP_VIDEO_PATH)))
                 .build();
         try {
-            absSender.execute(sendMessage);
+            absSender.execute(sendAnimation);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 

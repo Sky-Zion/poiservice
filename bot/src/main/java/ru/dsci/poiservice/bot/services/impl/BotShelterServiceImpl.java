@@ -3,14 +3,14 @@ package ru.dsci.poiservice.bot.services.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.dsci.poiservice.core.entities.Poi;
-import ru.dsci.poiservice.core.entities.PoiType;
-import ru.dsci.poiservice.core.services.PoiService;
-import ru.dsci.poiservice.core.services.PoiTypeService;
 import ru.dsci.poiservice.bot.dtos.PoiDistance;
 import ru.dsci.poiservice.bot.dtos.PoiDistanceList;
 import ru.dsci.poiservice.bot.services.BotShelterService;
+import ru.dsci.poiservice.core.entities.Poi;
+import ru.dsci.poiservice.core.entities.PoiType;
 import ru.dsci.poiservice.core.geomath.Point;
+import ru.dsci.poiservice.core.services.PoiService;
+import ru.dsci.poiservice.core.services.PoiTypeService;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -69,4 +69,12 @@ public class BotShelterServiceImpl implements BotShelterService {
         }
         return poiDistanceList;
     }
+
+    public PoiDistanceList getAllNearLocation(Point location, int size) {
+        PoiDistanceList poiDistanceList = getAllNearLocation(location);
+        poiDistanceList.truncateSizeTo(size);
+        return poiDistanceList;
+    }
+
+
 }

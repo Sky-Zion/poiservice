@@ -5,7 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-import ru.dsci.poiservice.core.services.OsmGeoService;
+import ru.dsci.poiservice.core.services.GeoService;
+import ru.dsci.poiservice.core.services.impl.GeoServiceImpl;
 import ru.dsci.poiservice.shell.services.ShellService;
 
 import java.math.BigDecimal;
@@ -16,7 +17,8 @@ import java.math.BigDecimal;
 public class Cli {
 
     private final ShellService shellService;
-    private final OsmGeoService osmGeoService;
+
+    private final GeoService geoService;
 
     @ShellMethod(key = "lim", value = "list map items from yandex map")
     public void updatePoiFromYandexMap(
@@ -154,7 +156,7 @@ public class Cli {
                     String address
     ) {
         try {
-            log.info(osmGeoService.getByAddress(address).toString());
+            log.info(geoService.getByAddress(address).toString());
         } catch (Exception e) {
             log.error("Error: {}", e.getMessage());
         }

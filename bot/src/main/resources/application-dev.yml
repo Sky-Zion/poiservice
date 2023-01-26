@@ -30,6 +30,10 @@ telegram_bot:
   username: ShelterBaseTest
   token: 5925307716:AAEoP4KnSNWAZO-26u61MqBV0uujzHUFTGw
 
-
 poi:
-  seek_range_list: 300,1000,3000
+  seek_range_list: 300,1000,3000,5000,10000
+  max_results: 10
+
+geocoder:
+  key: rutlwl7657
+

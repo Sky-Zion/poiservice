@@ -18,7 +18,7 @@ spring:
       mode: never
 
 logging:
-  level.ru.dsci.*: warn
+  level.ru.dsci.*: info
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread]: %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.sss} [%thread] %-5level %logger{36}: %msg%n"
@@ -31,4 +31,8 @@ telegram_bot:
   token: 5935777952:AAE6Z5Fc39kvz7lkaDZYjcwGZ7uXqCaBX5E
 
 poi:
-  seek_range_list: 300,1000,3000
+  seek_range_list: 300,1000,3000,5000,10000
+  max_results: 10
+
+geocoder:
+  key: rutlwl7657

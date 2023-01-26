@@ -14,4 +14,6 @@ public interface BotShelterService {
 
     PoiDistanceList getAllNearLocation(Point location);
 
+    PoiDistanceList getAllNearLocation(Point location, int size);
+
 }

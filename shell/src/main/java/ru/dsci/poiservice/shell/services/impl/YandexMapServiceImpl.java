@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import ru.dsci.poiservice.shell.services.YandexMapService;
 import ru.dsci.poiservice.core.entities.Poi;
 import ru.dsci.poiservice.core.entities.PoiType;
-import ru.dsci.poiservice.core.entities.dtos.DtoOsmPoi;
+import ru.dsci.poiservice.core.entities.dtos.DtoPoi;
 import ru.dsci.poiservice.shell.scrapers.ScrapeYandexMapAddresses;
-import ru.dsci.poiservice.core.services.OsmGeoService;
+import ru.dsci.poiservice.core.services.GeoService;
 import ru.dsci.poiservice.core.services.PoiService;
 import ru.dsci.poiservice.core.services.PoiTypeService;
 
@@ -22,7 +22,7 @@ import java.util.List;
 public class YandexMapServiceImpl implements YandexMapService {
 
     private final ScrapeYandexMapAddresses scrapeYandexMapPoi;
-    private final OsmGeoService osmGeoService;
+    private final GeoService osmGeoService;
     private final PoiTypeService poiTypeService;
     private final PoiService poiService;
     private final ModelMapper modelMapper;
@@ -43,7 +43,7 @@ public class YandexMapServiceImpl implements YandexMapService {
         String yandexPoi = null;
         for (int i = 0; i < items; i++) {
             try {
-                DtoOsmPoi dtoOsmPoi;
+                DtoPoi dtoOsmPoi;
                 yandexPoi = yandexPois.get(i);
                 String[] poiAddress = yandexPoi.split(":");
                 String address = poiAddress.length == 1 ? poiAddress[0] : poiAddress[poiAddress.length - 1];
