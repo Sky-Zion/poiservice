@@ -4,7 +4,7 @@ import ru.dsci.poiservice.core.entities.dtos.DtoPoi;
 
 import javax.persistence.EntityNotFoundException;
 
-public interface GeoService {
+public interface GeoServiceImpl {
 
     DtoPoi getByAddress(String address) throws EntityNotFoundException;
 

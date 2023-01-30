@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import ru.dsci.poiservice.core.clients.HttpClientImpl;
 import ru.dsci.poiservice.core.entities.dtos.DtoPoi;
-import ru.dsci.poiservice.core.services.GeoService;
+import ru.dsci.poiservice.core.services.GeoServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import java.net.http.HttpResponse;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class OsmGeoService implements GeoService {
+public class OsmGeoServiceImpl implements GeoServiceImpl {
 
     private final static String URL_BLANK = "https://nominatim.openstreetmap.org/search?q=%s&format=json&addressdetails=1";
 

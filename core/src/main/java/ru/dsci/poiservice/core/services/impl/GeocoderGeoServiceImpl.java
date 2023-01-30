@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import ru.dsci.poiservice.core.StringTools;
 import ru.dsci.poiservice.core.clients.HttpClientImpl;
 import ru.dsci.poiservice.core.entities.dtos.DtoPoi;
-import ru.dsci.poiservice.core.services.GeoService;
+import ru.dsci.poiservice.core.services.GeoServiceImpl;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import java.net.http.HttpResponse;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class GeocoderGeoService implements GeoService {
+public class GeocoderGeoServiceImpl implements GeoServiceImpl {
 
     private final static String URL_BLANK = "https://catalog.api.2gis.com/3.0/items/geocode?q=%s&fields=items.point&key=%s";
 
@@ -28,7 +28,7 @@ public class GeocoderGeoService implements GeoService {
     @Value("${geocoder.key}")
     private String key;
 
-    private DtoPoi getDtoGeocoderPoi(JSONObject responseData) throws IOException {
+    private DtoPoi getDtoGeocoderPoi(JSONObject responseData) {
         DtoPoi dtoOsmPoi = null;
         try {
             if (responseData.has("id")

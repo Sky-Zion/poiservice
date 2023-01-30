@@ -27,3 +27,16 @@ create index idx_poi_type_osm_id on poi (type_id, osm_id);
 create index idx_type_id_address on poi (type_id, address);
 create unique index idxu_type_osm_description on poi (type_id, description);
 -----------------------------------------------------------
+
+-- map ----------------------------------------------------
+drop table if exists map cascade;
+create table map
+(
+    id          serial primary key,
+    code        varchar (32) not null,
+    title       varchar (256) not null,
+    url         varchar (1024) not null,
+    description varchar (1024)
+);
+create unique index idx_map_code on map (code);
+-----------------------------------------------------------

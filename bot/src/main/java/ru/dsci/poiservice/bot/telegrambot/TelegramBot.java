@@ -8,7 +8,11 @@ import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingC
 import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.methods.send.SendLocation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.objects.Location;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.dsci.poiservice.bot.commands.CommandHelp;
 import ru.dsci.poiservice.bot.commands.CommandStart;
@@ -27,6 +31,14 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
 
     private final BotShelterService botShelterService;
 
+    private final BotKeyboard botKeyboard;
+
+    private final CommandStart commandStart;
+
+    private final CommandHelp commandHelp;
+
+    private final BotMedia botMedia;
+
     @Value("${telegram_bot.username}")
     private String botUserName;
 
@@ -38,8 +50,8 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
 
     @PostConstruct
     private void init() {
-        register(new CommandHelp());
-        register(new CommandStart());
+        register(commandStart);
+        register(commandHelp);
     }
 
     @Override
@@ -53,47 +65,91 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
     }
 
     @Override
-    public void processNonCommandUpdate(org.telegram.telegrambots.meta.api.objects.Update update) {
-        Long chatId = update.getMessage().getChatId();
+    public void processNonCommandUpdate(Update update) {
+        try {
+            if (update.hasMessage()) {
+                Long chatId = update.getMessage().getChatId();
+                Message message = update.getMessage();
+                if (update.getMessage().hasLocation() && update.getMessage().getLocation() != null) {
+                    processLocation(update);
+                } else {
+                    if (message.getText().equals(BotKeyboard.BUTTONS.MAPS.getTitle())) {
+                        processMaps(message);
+                    } else if (message.getText().equals(BotKeyboard.BUTTONS.HOW_TO_VIDEO.getTitle())) {
+                        processHowTo(message);
+                    } else
+                        helpReply(chatId);
+                }
+
+            }
+        } catch (RuntimeException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void processMaps(Message message) {
+        try {
+            SendMessage sendMessage = SendMessage.builder().chatId(message.getChatId()).text("Карты укрытий:").build();
+            sendMessage.setReplyMarkup(botKeyboard.getMapsInlineKeyboard());
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void processHowTo(Message message) {
+        try {
+            SendVideo sendVideo = SendVideo.builder().chatId(message.getChatId()).video(botMedia.getHowToVideo()).build();
+            execute(sendVideo);
+        } catch (TelegramApiException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void processLocation(Update update) {
+        Long chatId;
         StringBuilder text = new StringBuilder();
         Poi nearestPoi = null;
         PoiDistanceList poiDistanceList;
         Point userLocation;
         String userName;
+        Message message = update.getMessage();
+        chatId = message.getChatId();
         userName = String.format("%s %s",
-                update.getMessage().getChat().getFirstName(),
-                update.getMessage().getChat().getLastName());
-        if (update.hasMessage()
-                && update.getMessage() != null
-                && update.getMessage().hasLocation()
-                && update.getMessage().getLocation() != null) try {
-            if (update.getMessage().hasLocation() && update.getMessage().getLocation() != null) {
-                Location location = update.getMessage().getLocation();
-                log.info("#{} ({}) location: [{},{}]", chatId, userName, location.getLatitude(), location.getLongitude());
-                userLocation = new Point(location.getLatitude(), location.getLongitude());
-                poiDistanceList = botShelterService.getAllNearLocation(userLocation, limit);
-                if (poiDistanceList.size() > 0) {
-                    text.append(String.format("\uD83D\uDEA8Найдены укрытия (%d м):\n",
-                            (int) poiDistanceList.get(poiDistanceList.size() - 1).getDistance()));
-                    for (int i = 0; i < poiDistanceList.size(); i++) {
-                        PoiDistance poiDistance = poiDistanceList.get(i);
-                        text.append(String.format("%d: %s (%d м)\n",
-                                i + 1, poiDistance.getPoi().getAddress(), (int) (poiDistance.getDistance())));
-                    }
-                    nearestPoi = poiDistanceList.get(0).getPoi();
-                    text.append(String.format("\uD83D\uDCCDБлижайшее укрытие: %s", nearestPoi.getDescription()));
-                } else {
-                    String response = "\uD83D\uDE16Укрытия поблизости не найдены";
-                    text.append(response);
-                }
+                message.getChat().getFirstName(),
+                message.getChat().getLastName());
+        Location location = message.getLocation();
+        InlineKeyboardMarkup poiKeyboard = null;
+        try {
+            if (!message.hasLocation() || message.getLocation() == null) {
+                throw new RuntimeException("Location is missing");
             }
-        } catch (Exception e) {
+            log.info("#{} ({}) location: [{},{}]", chatId, userName, location.getLatitude(), location.getLongitude());
+            userLocation = new Point(location.getLatitude(), location.getLongitude());
+            poiDistanceList = botShelterService.getAllNearLocation(userLocation, limit);
+            if (poiDistanceList.size() > 0) {
+                text.append(String.format("\uD83D\uDEA8Найдены укрытия (%d м):\n",
+                        (int) poiDistanceList.get(poiDistanceList.size() - 1).getDistance()));
+
+                for (int i = 0; i < poiDistanceList.size(); i++) {
+                    PoiDistance poiDistance = poiDistanceList.get(i);
+                    text.append(String.format("%d: %s (%d м)\n",
+                            i + 1, poiDistance.getPoi().getAddress(), (int) (poiDistance.getDistance())));
+                }
+                nearestPoi = poiDistanceList.get(0).getPoi();
+                text.append(String.format("\uD83D\uDCCDБлижайшее укрытие: %s", nearestPoi.getDescription()));
+            } else {
+                String response = "\uD83D\uDE16Укрытия поблизости не найдены";
+                text.append(response);
+            }
+        } catch (RuntimeException e) {
             log.error(e.getMessage());
             text.append("\u2757Ошибка определения местоположения");
         } finally {
             try {
                 log.info("#{} ({}) response: {}", chatId, userName, text);
                 SendMessage sendMessage = SendMessage.builder().chatId(chatId).text(text.toString()).build();
+                sendMessage.setReplyMarkup(poiKeyboard);
                 execute(sendMessage);
                 if (nearestPoi != null) {
                     SendLocation sendLocation = SendLocation.builder().chatId(chatId).latitude(nearestPoi.getGeoLat().doubleValue()).longitude(nearestPoi.getGeoLon().doubleValue()).build();
@@ -103,9 +159,6 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
                 log.error(e.getMessage());
             }
         }
-        else {
-            helpReply(chatId);
-        }
     }
 
     private void helpReply(Long chatId) {
@@ -114,7 +167,6 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
                     .builder()
                     .chatId(chatId)
                     .caption(CommandHelp.HELP_LOCATION)
-                    .animation(CommandHelp.HELP_LOCATION_VIDEO)
                     .build();
             execute(sendAnimation);
         } catch (TelegramApiException e) {

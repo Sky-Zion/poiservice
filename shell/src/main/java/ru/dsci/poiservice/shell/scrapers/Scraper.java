@@ -26,7 +26,7 @@ public abstract class Scraper<E> implements AutoCloseable {
 
     private static final int DEFAULT_SLOW_MO = 10;
     private static final int DEFAULT_TIMEOUT = 30000;
-    private static final int WAIT_FOR_SELECTOR_TIMEOUT = 5000;
+    private static final int WAIT_FOR_SELECTOR_TIMEOUT = 15000;
 
     protected Playwright playwright = PlaywrightInstance.getInstance();
     protected Page page;

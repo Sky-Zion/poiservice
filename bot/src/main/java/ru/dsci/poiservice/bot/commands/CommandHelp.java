@@ -1,6 +1,7 @@
 package ru.dsci.poiservice.bot.commands;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -11,23 +12,28 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.File;
 
 @Slf4j
+@Component
 public class CommandHelp implements IBotCommand {
 
     public final static String HELP_MESSAGE =
-            "\u261DЧат-бот служит для поиска укрытий\n" +
-                    "Поможет сориентироваться в ситуации во время обстрела.\n\n" +
-                    "\uD83D\uDCA5Использование:\n" +
-                    "просто отправьте боту вашу текущую геопозицию,\n" +
-                    "в ответ будет направлен список ближайших укрытий.\n\n" +
-                    "\uD83D\uDE0EРазработчик: @SkyZion";
+            "\u261DЧат-бот поможет найти ближайшие укрытия.\n\n" +
+
+                    "Использование:\n" +
+                    "\uD83D\uDCCCдля поиска укрытий нажмите кнопку \"Найти укрытия\" или отправьте геопозицию, " +
+                    "в ответном сообщении вы получите список ближайших укрытий;\n" +
+                    "\uD83D\uDCCCдля просмотра интерактивных карт укрытий нажмите кнопку \"Карты укрытий\"," +
+                    "в ответном сообщении вы получите список интерактивных карт,\n" +
+                    "чобы просмотреть карту, нажмите на соответствующий населенный пункт;\n" +
+                    "\uD83D\uDCCCпросмотрите обучающий ролик \"как вести себя при обстреле, для этого\"\n" +
+                    "нажмите кнопку с соответствующим названием.\n\n" +
+
+                    "\u2757 Проинспектируйте укрытия, изготовьте ключи, продумайте маршрут.\n\n" +
+
+                    "\uD83D\uDE0EРазработчик: @SkyZion\n" +
+                    "буду рад сотрудничеству";
 
     public final static String HELP_LOCATION =
             "\u261DНеобходимо отправить боту вашу текущую геопозицию.";
-
-    public final static String HELP_VIDEO_PATH = "bot/src/main/resources/media/help.mp4";
-
-    public final static InputFile HELP_LOCATION_VIDEO = new InputFile(new File(HELP_VIDEO_PATH));
-
 
     @Override
     public String getCommandIdentifier() {
@@ -45,7 +51,6 @@ public class CommandHelp implements IBotCommand {
                 .builder()
                 .chatId(message.getChatId())
                 .caption(HELP_MESSAGE)
-                .animation(HELP_LOCATION_VIDEO)
                 .build();
         try {
             absSender.execute(sendAnimation);

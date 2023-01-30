@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import ru.dsci.poiservice.core.entities.dtos.DtoPoi;
-import ru.dsci.poiservice.core.services.GeoService;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -13,11 +12,11 @@ import javax.persistence.EntityNotFoundException;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GeoServiceImpl implements GeoService {
+public class GeoServiceImplImpl implements ru.dsci.poiservice.core.services.GeoServiceImpl {
 
-    private final GeocoderGeoService geocoderGeoService;
+    private final GeocoderGeoServiceImpl geocoderGeoService;
 
-    private final OsmGeoService osmGeoService;
+    private final OsmGeoServiceImpl osmGeoService;
 
     @Override
     public DtoPoi getByAddress(String address) throws EntityNotFoundException {
@@ -25,14 +24,18 @@ public class GeoServiceImpl implements GeoService {
         try {
             dtoPoi = osmGeoService.getByAddress(address);
         } catch (Exception e) {
-            log.warn(e.getMessage());
+            log.debug(e.getMessage());
         }
         if (dtoPoi == null
                 || dtoPoi.getGeoLat() == null
                 || dtoPoi.getGeoLon() == null
                 || dtoPoi.getAddress() == null
                 || dtoPoi.getAddress().length() < 1)
-            dtoPoi = geocoderGeoService.getByAddress(address);
+            try {
+                dtoPoi = geocoderGeoService.getByAddress(address);
+            } catch (Exception e) {
+                log.warn(e.getMessage());
+            }
         return dtoPoi;
     }
 }

@@ -4,14 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import ru.dsci.poiservice.shell.services.YandexMapService;
 import ru.dsci.poiservice.core.entities.Poi;
 import ru.dsci.poiservice.core.entities.PoiType;
 import ru.dsci.poiservice.core.entities.dtos.DtoPoi;
-import ru.dsci.poiservice.shell.scrapers.ScrapeYandexMapAddresses;
-import ru.dsci.poiservice.core.services.GeoService;
+import ru.dsci.poiservice.core.services.GeoServiceImpl;
 import ru.dsci.poiservice.core.services.PoiService;
 import ru.dsci.poiservice.core.services.PoiTypeService;
+import ru.dsci.poiservice.shell.scrapers.ScrapeYandexMapAddresses;
+import ru.dsci.poiservice.shell.services.YandexMapService;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,14 +21,18 @@ import java.util.List;
 @Slf4j
 public class YandexMapServiceImpl implements YandexMapService {
 
+    public static final String ADDRESS_REGEX =
+            ".*(д.|дом|ул.|улица|пр.|проспект|пер.|переулок|с.|село|п.|посёлок|поселок|г.|город|образование|р-н|район|обл.|область).*";
+
     private final ScrapeYandexMapAddresses scrapeYandexMapPoi;
-    private final GeoService osmGeoService;
+    private final GeoServiceImpl osmGeoService;
     private final PoiTypeService poiTypeService;
     private final PoiService poiService;
     private final ModelMapper modelMapper;
 
     @Override
     public List<String> getItemsFromYandexMap(String url) {
+        scrapeYandexMapPoi.setTimeout(30000);
         scrapeYandexMapPoi.setUrl(url);
         return scrapeYandexMapPoi.doScrape();
     }
@@ -38,6 +42,22 @@ public class YandexMapServiceImpl implements YandexMapService {
         updatePoiFromYandexMap(poiTypeCode, url, null);
     }
 
+    private String getAddress(String mapAddress, String prefix) {
+        String address;
+        mapAddress = mapAddress.trim().replace("\"", "");
+        String[] addressess = mapAddress.split("\n");
+        for (int i = 0; i < addressess.length; i++) {
+            String[] possibleAddress = addressess[i].split(":");
+            for (int j = 1; j < possibleAddress.length; j++) {
+                if (possibleAddress[j].matches(ADDRESS_REGEX)) {
+                    address = prefix == null ? possibleAddress[j] : String.format("%s, %s", prefix, possibleAddress[j].trim());
+                    return address;
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
     public void updatePoiFromYandexMap(String poiTypeCode, String url, String prefix) {
         PoiType poiType = poiTypeService.getByCodeNotFoundError(poiTypeCode);
@@ -45,21 +65,19 @@ public class YandexMapServiceImpl implements YandexMapService {
         int items = yandexPois.size();
         int errors = 0;
         int warnings = 0;
-        String yandexPoi = null;
+        String yandexPoiAddress = null;
         for (int i = 0; i < items; i++) {
             try {
                 DtoPoi dtoOsmPoi;
-                yandexPoi = yandexPois.get(i);
-                String[] poiAddress = yandexPoi.split(":");
-                String address = poiAddress.length == 1 ? poiAddress[0] : poiAddress[poiAddress.length - 1];
-                if (prefix != null)
-                    address = String.format("%s, %s", prefix.trim(), address);
-                address = address.trim().replace("\"", "");
+                yandexPoiAddress = yandexPois.get(i);
+                String address = getAddress(yandexPoiAddress, prefix);
                 Poi poi = new Poi();
                 poi.setPoiType(poiType);
-                poi.setDescription(yandexPoi);
+                poi.setDescription(yandexPoiAddress);
                 poi.setAddress(address);
                 try {
+                    if (poi.getAddress() == null)
+                        throw new IOException("address is empty");
                     dtoOsmPoi = osmGeoService.getByAddress(address);
                     if (dtoOsmPoi != null)
                         modelMapper.map(dtoOsmPoi, poi);
@@ -83,7 +101,7 @@ public class YandexMapServiceImpl implements YandexMapService {
                         warnings,
                         errors,
                         items,
-                        yandexPoi,
+                        yandexPoiAddress,
                         e.getMessage());
             }
         }

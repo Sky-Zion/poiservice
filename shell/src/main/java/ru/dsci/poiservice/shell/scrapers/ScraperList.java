@@ -16,7 +16,12 @@ public class ScraperList extends Scraper<String> {
         Locator locator = super.page.locator(pattern);
         if (locator.count() == 0) throw new ScrapingException(this, "No data");
         for (int i = 0; i < locator.count(); i++) {
-            list.add(locator.nth(i).innerText());
+            StringBuilder text = new StringBuilder();
+            ArrayList<String> textArray = (ArrayList<String>) locator.nth(i).allInnerTexts();
+            for (int j = 0; j < textArray.size(); j++) {
+                text.append(text.length() < 1 ? textArray.get(j) : "\n" + textArray.get(j));
+            }
+            list.add(text.toString());
         }
         return list;
     }
