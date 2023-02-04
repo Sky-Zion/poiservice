@@ -22,8 +22,6 @@ import javax.annotation.PostConstruct;
 @Slf4j
 public class TelegramBot extends TelegramLongPollingCommandBot {
 
-    private final BotShelterService botShelterService;
-
     private final CommandStart commandStart;
 
     private final CommandHelp commandHelp;
@@ -116,7 +114,7 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
             text.append(contentHelper.getSheltersTextByLocation(location));
         } catch (RuntimeException e) {
             log.error(e.getMessage());
-            text.append("\u2757Произошла непредвиденная ошибка");
+            text.append(constants.getErrorMessage());
         } finally {
             try {
                 log.info("#{} ({}) response: {}", chatId, userName, text);
@@ -135,6 +133,7 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
                     .builder()
                     .chatId(chatId)
                     .text(CommandHelp.HELP_MESSAGE)
+                    .replyMarkup(keyboard.getStaticKeyboard())
                     .build();
             execute(sendMessage);
         } catch (TelegramApiException e) {

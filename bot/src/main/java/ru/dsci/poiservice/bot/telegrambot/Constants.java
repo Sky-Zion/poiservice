@@ -12,6 +12,11 @@ public class Constants {
 
     private final static String BLANK_GMAP_A_TAG = "<a href=\"https://maps.google.com/maps/place/%f+%f/@%f\" target=\"_blank\" rel=\"noopener noreferrer\" data-entity-type=\"MessageEntityUrl\">%s</a>";
 
+    private final static String ERROR_MESSAGE = "\u2757Очень сожалею, произошла непредвиденная ошибка \n" +
+            "Скорее всего мы просто обновили приложение и чтобы обновления вступили в силу, необходимо перезапустить бот" +
+            "<a data-entity-type=\"MessageEntityBotCommand\">/start</a>\n\n" +
+            "Если перезапукск не помог, то мы точно накосячили, свжитесь с разработчиком @SkyZion";
+
     @Value("${resources.media_path}")
     private String mediaPath;
 
@@ -51,4 +56,7 @@ public class Constants {
     public String getBlankGmapATag() {
         return BLANK_GMAP_A_TAG;
     }
+
+    public String getErrorMessage() {return ERROR_MESSAGE;}
+
 }

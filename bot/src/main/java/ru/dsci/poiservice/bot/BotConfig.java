@@ -14,6 +14,8 @@ import ru.dsci.poiservice.core.mappers.PoiMapper;
 
 @Configuration
 @ComponentScan(basePackages = {"ru.dsci.poiservice.core"})
+@ComponentScan(basePackages = "ru.dsci.poiservice.bot")
+
 @EnableJpaRepositories("ru.dsci.poiservice.core.repositories")
 @EntityScan({"ru.dsci.poiservice.core.entities"})
 public class BotConfig {
