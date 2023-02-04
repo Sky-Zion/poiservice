@@ -7,8 +7,8 @@ import java.util.Objects;
 
 @Entity
 @Data
-@Table(name = "map")
-public class Map {
+@Table(name = "poi_url")
+public class PoiUrl {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,9 +35,9 @@ public class Map {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Map)) return false;
-        Map map = (Map) o;
-        return getCode().equals(map.getCode()) && getTitle().equals(map.getTitle()) && getUrl().equals(map.getUrl()) && Objects.equals(getDescription(), map.getDescription());
+        if (!(o instanceof PoiUrl)) return false;
+        PoiUrl poiUrl = (PoiUrl) o;
+        return getCode().equals(poiUrl.getCode()) && getTitle().equals(poiUrl.getTitle()) && getUrl().equals(poiUrl.getUrl()) && Objects.equals(getDescription(), poiUrl.getDescription());
     }
 
     @Override

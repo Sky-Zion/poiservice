@@ -8,10 +8,15 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 
 @Component
-public class BotMedia {
+public class Constants {
 
-    @Value("${resources.media}")
+    private final static String BLANK_GMAP_A_TAG = "<a href=\"https://maps.google.com/maps/place/%f+%f/@%f\" target=\"_blank\" rel=\"noopener noreferrer\" data-entity-type=\"MessageEntityUrl\">%s</a>";
+
+    @Value("${resources.media_path}")
     private String mediaPath;
+
+    @Value("${resources.map_url}")
+    private String mapUrl;
 
     private String howToPath;
     private String helpPath;
@@ -39,4 +44,11 @@ public class BotMedia {
         return howToVideo;
     }
 
+    public String getMapUrl() {
+        return mapUrl;
+    }
+
+    public String getBlankGmapATag() {
+        return BLANK_GMAP_A_TAG;
+    }
 }

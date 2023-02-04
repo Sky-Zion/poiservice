@@ -38,4 +38,5 @@ geocoder:
   key: rutlwl7657
 
 resources:
-  media: bot/src/main/resources/media
+  media_path: bot/src/main/resources/media
+  map_url: https://www.google.com/maps/d/edit?mid=1XFHja4qVec5STrKzqbEHtjB2rHmFGH8&ll=50.72749662825774%2C37.167550269531226&z=9

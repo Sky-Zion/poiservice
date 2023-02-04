@@ -5,22 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
-import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
-import org.telegram.telegrambots.meta.api.methods.send.SendLocation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.dsci.poiservice.bot.commands.CommandHelp;
 import ru.dsci.poiservice.bot.commands.CommandStart;
-import ru.dsci.poiservice.bot.dtos.PoiDistance;
-import ru.dsci.poiservice.bot.dtos.PoiDistanceList;
 import ru.dsci.poiservice.bot.services.BotShelterService;
-import ru.dsci.poiservice.core.entities.Poi;
-import ru.dsci.poiservice.core.geomath.Point;
 
 import javax.annotation.PostConstruct;
 
@@ -31,19 +24,18 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
 
     private final BotShelterService botShelterService;
 
-    private final BotKeyboard botKeyboard;
-
     private final CommandStart commandStart;
 
     private final CommandHelp commandHelp;
 
-    private final BotMedia botMedia;
+    private final Constants constants;
+
+    private final Keyboard keyboard;
+
+    private final ContentHelper contentHelper;
 
     @Value("${telegram_bot.username}")
     private String botUserName;
-
-    @Value("#{new Integer('${poi.max_results}')}")
-    private Integer limit;
 
     @Value("${telegram_bot.token}")
     private String botToken;
@@ -73,9 +65,9 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
                 if (update.getMessage().hasLocation() && update.getMessage().getLocation() != null) {
                     processLocation(update);
                 } else {
-                    if (message.getText().equals(BotKeyboard.BUTTONS.MAPS.getTitle())) {
+                    if (message.getText().equals(Keyboard.BUTTONS.MAPS.getTitle())) {
                         processMaps(message);
-                    } else if (message.getText().equals(BotKeyboard.BUTTONS.HOW_TO_VIDEO.getTitle())) {
+                    } else if (message.getText().equals(Keyboard.BUTTONS.HOW_TO_VIDEO.getTitle())) {
                         processHowTo(message);
                     } else
                         helpReply(chatId);
@@ -90,7 +82,6 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
     private void processMaps(Message message) {
         try {
             SendMessage sendMessage = SendMessage.builder().chatId(message.getChatId()).text("Карты укрытий:").build();
-            sendMessage.setReplyMarkup(botKeyboard.getMapsInlineKeyboard());
             execute(sendMessage);
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
@@ -99,7 +90,7 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
 
     private void processHowTo(Message message) {
         try {
-            SendVideo sendVideo = SendVideo.builder().chatId(message.getChatId()).video(botMedia.getHowToVideo()).build();
+            SendVideo sendVideo = SendVideo.builder().chatId(message.getChatId()).video(constants.getHowToVideo()).build();
             execute(sendVideo);
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
@@ -109,9 +100,7 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
     private void processLocation(Update update) {
         Long chatId;
         StringBuilder text = new StringBuilder();
-        Poi nearestPoi = null;
-        PoiDistanceList poiDistanceList;
-        Point userLocation;
+
         String userName;
         Message message = update.getMessage();
         chatId = message.getChatId();
@@ -119,42 +108,21 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
                 message.getChat().getFirstName(),
                 message.getChat().getLastName());
         Location location = message.getLocation();
-        InlineKeyboardMarkup poiKeyboard = null;
         try {
             if (!message.hasLocation() || message.getLocation() == null) {
                 throw new RuntimeException("Location is missing");
             }
             log.info("#{} ({}) location: [{},{}]", chatId, userName, location.getLatitude(), location.getLongitude());
-            userLocation = new Point(location.getLatitude(), location.getLongitude());
-            poiDistanceList = botShelterService.getAllNearLocation(userLocation, limit);
-            if (poiDistanceList.size() > 0) {
-                text.append(String.format("\uD83D\uDEA8Найдены укрытия (%d м):\n",
-                        (int) poiDistanceList.get(poiDistanceList.size() - 1).getDistance()));
-
-                for (int i = 0; i < poiDistanceList.size(); i++) {
-                    PoiDistance poiDistance = poiDistanceList.get(i);
-                    text.append(String.format("%d: %s (%d м)\n",
-                            i + 1, poiDistance.getPoi().getAddress(), (int) (poiDistance.getDistance())));
-                }
-                nearestPoi = poiDistanceList.get(0).getPoi();
-                text.append(String.format("\uD83D\uDCCDБлижайшее укрытие: %s", nearestPoi.getDescription()));
-            } else {
-                String response = "\uD83D\uDE16Укрытия поблизости не найдены";
-                text.append(response);
-            }
+            text.append(contentHelper.getSheltersTextByLocation(location));
         } catch (RuntimeException e) {
             log.error(e.getMessage());
-            text.append("\u2757Ошибка определения местоположения");
+            text.append("\u2757Произошла непредвиденная ошибка");
         } finally {
             try {
                 log.info("#{} ({}) response: {}", chatId, userName, text);
-                SendMessage sendMessage = SendMessage.builder().chatId(chatId).text(text.toString()).build();
-                sendMessage.setReplyMarkup(poiKeyboard);
+                SendMessage sendMessage = SendMessage.builder().chatId(chatId).text(text.toString()).parseMode("HTML").build();
+                sendMessage.setReplyMarkup(keyboard.getStaticKeyboard());
                 execute(sendMessage);
-                if (nearestPoi != null) {
-                    SendLocation sendLocation = SendLocation.builder().chatId(chatId).latitude(nearestPoi.getGeoLat().doubleValue()).longitude(nearestPoi.getGeoLon().doubleValue()).build();
-                    execute(sendLocation);
-                }
             } catch (TelegramApiException e) {
                 log.error(e.getMessage());
             }
@@ -163,12 +131,12 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
 
     private void helpReply(Long chatId) {
         try {
-            SendAnimation sendAnimation = SendAnimation
+            SendMessage sendMessage = SendMessage
                     .builder()
                     .chatId(chatId)
-                    .caption(CommandHelp.HELP_LOCATION)
+                    .text(CommandHelp.HELP_MESSAGE)
                     .build();
-            execute(sendAnimation);
+            execute(sendMessage);
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }

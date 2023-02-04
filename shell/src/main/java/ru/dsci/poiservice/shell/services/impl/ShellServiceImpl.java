@@ -15,7 +15,6 @@ import ru.dsci.poiservice.shell.services.YandexMapService;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 

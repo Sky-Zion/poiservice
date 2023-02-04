@@ -76,5 +76,4 @@ public class BotShelterServiceImpl implements BotShelterService {
         return poiDistanceList;
     }
 
-
 }

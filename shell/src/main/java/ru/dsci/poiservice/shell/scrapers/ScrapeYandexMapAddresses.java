@@ -15,7 +15,7 @@ public class ScrapeYandexMapAddresses extends ScraperList {
 
     @Override
     public void setUrl(String url) {
-        super.setUrl(url == null? DEFAULT_URL:url);
+        super.setUrl(url == null ? DEFAULT_URL : url);
     }
 
 }

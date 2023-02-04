@@ -21,7 +21,7 @@ geocoder:
   key: rutlwl7657
 
 logging:
-  level.ru.dsci.*: debug
+  level.ru.dsci.*: info
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread]: %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.sss} [%thread] %-5level %logger{36}: %msg%n"

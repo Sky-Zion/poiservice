@@ -1,29 +1,34 @@
 package ru.dsci.poiservice.bot.commands;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
-import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import java.io.File;
+import ru.dsci.poiservice.bot.telegrambot.Keyboard;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class CommandHelp implements IBotCommand {
 
+    private final Keyboard keyboard;
+
     public final static String HELP_MESSAGE =
-            "\u261DЧат-бот поможет найти ближайшие укрытия.\n\n" +
+            "\u261DЧат-бот поможет:\n" +
+                    "\uD83D\uDCCCнайти ближайшие укрытия;\n" +
+                    "\uD83D\uDCCCпросмотреть карту укрытий;\n" +
+                    "\uD83D\uDCCCпроложить маршрут к укрытию;\n" +
+                    "\uD83D\uDCCCузнать какие действия необходимо предпринять в случае возникновения чрезвычайной ситуации.\n\n" +
 
                     "Использование:\n" +
-                    "\uD83D\uDCCCдля поиска укрытий нажмите кнопку \"Найти укрытия\" или отправьте геопозицию, " +
+                    "\uD83D\uDCCCдля поиска укрытий нажмите кнопку \"Найти укрытия\" , " +
                     "в ответном сообщении вы получите список ближайших укрытий;\n" +
-                    "\uD83D\uDCCCдля просмотра интерактивных карт укрытий нажмите кнопку \"Карты укрытий\"," +
-                    "в ответном сообщении вы получите список интерактивных карт,\n" +
-                    "чобы просмотреть карту, нажмите на соответствующий населенный пункт;\n" +
+                    "\uD83D\uDCCCчтобы проложить маршрут, необходимо нажать на ссылку с адресом укрытия\n" +
+                    "\uD83D\uDCCCдля просмотра карты укрытий нажмите кнопку \"Карта укрытий\";\n" +
                     "\uD83D\uDCCCпросмотрите обучающий ролик \"как вести себя при обстреле, для этого\"\n" +
                     "нажмите кнопку с соответствующим названием.\n\n" +
 
@@ -31,9 +36,6 @@ public class CommandHelp implements IBotCommand {
 
                     "\uD83D\uDE0EРазработчик: @SkyZion\n" +
                     "буду рад сотрудничеству";
-
-    public final static String HELP_LOCATION =
-            "\u261DНеобходимо отправить боту вашу текущую геопозицию.";
 
     @Override
     public String getCommandIdentifier() {
@@ -47,13 +49,14 @@ public class CommandHelp implements IBotCommand {
 
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] strings) {
-        SendAnimation sendAnimation = SendAnimation
+        SendMessage sendMessage = SendMessage
                 .builder()
                 .chatId(message.getChatId())
-                .caption(HELP_MESSAGE)
+                .text(HELP_MESSAGE)
+                .replyMarkup(keyboard.getStaticKeyboard())
                 .build();
         try {
-            absSender.execute(sendAnimation);
+            absSender.execute(sendMessage);
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }

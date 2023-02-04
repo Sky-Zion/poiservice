@@ -2,4 +2,4 @@ spring:
   application:
     name: bot
   profiles:
-    active: dev
+    active: prod

@@ -5,10 +5,10 @@ import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.WaitUntilState;
-import ru.dsci.poiservice.shell.scrapers.exceptions.ScrapingExecutionException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.dsci.poiservice.shell.scrapers.exceptions.ScrapingException;
+import ru.dsci.poiservice.shell.scrapers.exceptions.ScrapingExecutionException;
 
 import java.util.List;
 import java.util.concurrent.*;
@@ -109,7 +109,8 @@ public abstract class Scraper<E> implements AutoCloseable {
         initSettings();
         List<E> results;
         String scraperClass = this.getClass().getSimpleName();
-        if (playwright == null || browser == null || !browser.isConnected() || page == null || page.isClosed()) initScraper();
+        if (playwright == null || browser == null || !browser.isConnected() || page == null || page.isClosed())
+            initScraper();
         navigate();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
