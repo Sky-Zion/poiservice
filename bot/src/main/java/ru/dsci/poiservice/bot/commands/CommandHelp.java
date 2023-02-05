@@ -5,9 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.dsci.poiservice.bot.telegrambot.Constants;
 import ru.dsci.poiservice.bot.telegrambot.Keyboard;
 
 @Slf4j
@@ -17,25 +19,7 @@ public class CommandHelp implements IBotCommand {
 
     private final Keyboard keyboard;
 
-    public final static String HELP_MESSAGE =
-            "\u261DЧат-бот поможет:\n" +
-                    "\uD83D\uDCCCнайти ближайшие укрытия;\n" +
-                    "\uD83D\uDCCCпросмотреть карту укрытий;\n" +
-                    "\uD83D\uDCCCпроложить маршрут к укрытию;\n" +
-                    "\uD83D\uDCCCузнать какие действия необходимо предпринять в случае возникновения чрезвычайной ситуации.\n\n" +
-
-                    "Использование:\n" +
-                    "\uD83D\uDCCCдля поиска укрытий нажмите кнопку \"Найти укрытия\" , " +
-                    "в ответном сообщении вы получите список ближайших укрытий;\n" +
-                    "\uD83D\uDCCCчтобы проложить маршрут, необходимо нажать на ссылку с адресом укрытия\n" +
-                    "\uD83D\uDCCCдля просмотра карты укрытий нажмите кнопку \"Карта укрытий\";\n" +
-                    "\uD83D\uDCCCпросмотрите обучающий ролик \"как вести себя при обстреле, для этого\"\n" +
-                    "нажмите кнопку с соответствующим названием.\n\n" +
-
-                    "\u2757 Проинспектируйте укрытия, изготовьте ключи, продумайте маршрут.\n\n" +
-
-                    "\uD83D\uDE0EРазработчик: @SkyZion\n" +
-                    "буду рад сотрудничеству";
+    private final Constants constants;
 
     @Override
     public String getCommandIdentifier() {
@@ -52,7 +36,8 @@ public class CommandHelp implements IBotCommand {
         SendMessage sendMessage = SendMessage
                 .builder()
                 .chatId(message.getChatId())
-                .text(HELP_MESSAGE)
+                .text(constants.getHelpText())
+                .parseMode("HTML")
                 .replyMarkup(keyboard.getStaticKeyboard())
                 .build();
         try {

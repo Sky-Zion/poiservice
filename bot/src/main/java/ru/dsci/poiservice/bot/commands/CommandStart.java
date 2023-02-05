@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.dsci.poiservice.bot.telegrambot.Constants;
 import ru.dsci.poiservice.bot.telegrambot.Keyboard;
 
 @Slf4j
@@ -16,6 +17,8 @@ import ru.dsci.poiservice.bot.telegrambot.Keyboard;
 public class CommandStart implements IBotCommand {
 
     private final Keyboard keyboard;
+
+    private final Constants constants;
 
     @Override
     public String getCommandIdentifier() {
@@ -33,7 +36,7 @@ public class CommandStart implements IBotCommand {
         SendMessage sendMessage = SendMessage
                 .builder()
                 .chatId(message.getChatId())
-                .text(CommandHelp.HELP_MESSAGE)
+                .text(constants.getHelpText())
                 .replyMarkup(keyboard.getStaticKeyboard())
                 .build();
         try {

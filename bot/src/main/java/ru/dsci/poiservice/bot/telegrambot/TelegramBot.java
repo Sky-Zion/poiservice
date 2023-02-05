@@ -6,14 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
-import org.telegram.telegrambots.meta.api.objects.Location;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.dsci.poiservice.bot.commands.CommandHelp;
 import ru.dsci.poiservice.bot.commands.CommandStart;
-import ru.dsci.poiservice.bot.services.BotShelterService;
 
 import javax.annotation.PostConstruct;
 
@@ -30,7 +26,7 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
 
     private final Keyboard keyboard;
 
-    private final ContentHelper contentHelper;
+    private final MessageHandler messageHandler;
 
     @Value("${telegram_bot.username}")
     private String botUserName;
@@ -57,24 +53,22 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
     @Override
     public void processNonCommandUpdate(Update update) {
         try {
-            if (update.hasMessage()) {
-                Long chatId = update.getMessage().getChatId();
-                Message message = update.getMessage();
-                if (update.getMessage().hasLocation() && update.getMessage().getLocation() != null) {
-                    processLocation(update);
-                } else {
-                    if (message.getText().equals(Keyboard.BUTTONS.MAPS.getTitle())) {
-                        processMaps(message);
-                    } else if (message.getText().equals(Keyboard.BUTTONS.HOW_TO_VIDEO.getTitle())) {
-                        processHowTo(message);
-                    } else
-                        helpReply(chatId);
-                }
-
+            if (messageHandler.isUpdateHasLocation(update))
+                processLocation(update);
+            else {
+                messageHandler.checkUpdateHasMessage(update);
+                if (update.getMessage().getText().equals(Keyboard.BUTTONS.MAPS.getTitle()))
+                    processMaps(update.getMessage());
+                else if (update.getMessage().getText().equals(Keyboard.BUTTONS.HOW_TO_VIDEO.getTitle())) {
+                    processHowTo(update.getMessage().getChat());
+                } else
+                    sendHelpMessage(update.getMessage().getChat());
             }
-        } catch (RuntimeException e) {
+        } catch (
+                RuntimeException e) {
             log.error(e.getMessage());
         }
+
     }
 
     private void processMaps(Message message) {
@@ -86,58 +80,58 @@ public class TelegramBot extends TelegramLongPollingCommandBot {
         }
     }
 
-    private void processHowTo(Message message) {
-        try {
-            SendVideo sendVideo = SendVideo.builder().chatId(message.getChatId()).video(constants.getHowToVideo()).build();
-            execute(sendVideo);
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage());
-        }
+    private void processHowTo(Chat chat) {
+        sendVideo(chat, constants.getHowToVideo(), constants.getHowToVideoCaption());
     }
 
     private void processLocation(Update update) {
-        Long chatId;
         StringBuilder text = new StringBuilder();
-
-        String userName;
-        Message message = update.getMessage();
-        chatId = message.getChatId();
-        userName = String.format("%s %s",
-                message.getChat().getFirstName(),
-                message.getChat().getLastName());
-        Location location = message.getLocation();
         try {
-            if (!message.hasLocation() || message.getLocation() == null) {
-                throw new RuntimeException("Location is missing");
-            }
-            log.info("#{} ({}) location: [{},{}]", chatId, userName, location.getLatitude(), location.getLongitude());
-            text.append(contentHelper.getSheltersTextByLocation(location));
+            messageHandler.checkUpdateHasLocation(update);
+            Location location = update.getMessage().getLocation();
+            logInfoMessage(update.getMessage().getChat(), String.format("location: [%f,%f]", location.getLatitude(), location.getLongitude()));
+            text.append(messageHandler.getSheltersTextByLocation(location));
         } catch (RuntimeException e) {
             log.error(e.getMessage());
-            text.append(constants.getErrorMessage());
+            text.append(constants.getErrorText());
         } finally {
-            try {
-                log.info("#{} ({}) response: {}", chatId, userName, text);
-                SendMessage sendMessage = SendMessage.builder().chatId(chatId).text(text.toString()).parseMode("HTML").build();
-                sendMessage.setReplyMarkup(keyboard.getStaticKeyboard());
-                execute(sendMessage);
-            } catch (TelegramApiException e) {
-                log.error(e.getMessage());
-            }
+            sendMessage(update.getMessage().getChat(), text.toString());
         }
     }
 
-    private void helpReply(Long chatId) {
+    private void logInfoMessage(Chat chat, String message) {
+        String userName;
+        Long chatId = chat.getId();
+        userName = String.format("%s %s",
+                chat.getFirstName(),
+                chat.getLastName());
+        log.info("#{} ({}): {}", chatId, userName, message);
+    }
+
+    public void sendMessage(Chat chat, String text) {
         try {
-            SendMessage sendMessage = SendMessage
-                    .builder()
-                    .chatId(chatId)
-                    .text(CommandHelp.HELP_MESSAGE)
-                    .replyMarkup(keyboard.getStaticKeyboard())
-                    .build();
-            execute(sendMessage);
+            logInfoMessage(chat, String.format("SEND MESSAGE: %s", text));
+            execute(messageHandler.getSendMessage(chat, text));
         } catch (TelegramApiException e) {
-            log.error(e.getMessage());
+            log.error("SEND MESSAGE ERROR: {}", e.getMessage());
+        }
+    }
+
+    public void sendVideo(Chat chat, InputFile file, String caption) {
+        try {
+            logInfoMessage(chat, String.format("SEND VIDEO: %s (%s)", file.getMediaName(), caption));
+            execute(messageHandler.getSendVideo(chat, file, caption));
+        } catch (TelegramApiException e) {
+            log.error("SEND VIDEO ERROR: {}", e.getMessage());
+        }
+    }
+
+    public void sendHelpMessage(Chat chat) {
+        try {
+            logInfoMessage(chat, "SEND HELP MESSAGE");
+            execute(messageHandler.getSendMessageHelp(chat));
+        } catch (TelegramApiException e) {
+            log.error("SEND HELP MESSAGE ERROR: {}", e.getMessage());
         }
     }
 
